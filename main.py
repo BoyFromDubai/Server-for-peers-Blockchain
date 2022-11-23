@@ -37,11 +37,12 @@ class Server():
 
                 if msg_type.decode(self.decoding_format) == self.disconnect_message:
                     connected = False
+                    print(f'[DISCONNECTED] {client_ip}')
 
         conn.close()
 
     def __start_listening(self):
-        
+        print(f'[{self.listening_ip}] Server started listening on {self.listening_port}')
         self.server.listen()
 
         while True:
