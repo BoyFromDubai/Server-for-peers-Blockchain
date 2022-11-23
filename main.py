@@ -11,7 +11,7 @@ class Server():
         self.clients_port = 9999
 
         self.peers_request = 'peers_request'
-        self.decoding_format = 'utf-8'
+        self.msg_format = 'utf-8'
         self.disconnect_message = 'DISCONNECTED'
 
         self.server = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
@@ -23,21 +23,21 @@ class Server():
         print(f'[NEW CONNECTION] {addr}')
         client_ip, port = addr
         connected = True
-        while connected:
-            msg_length = conn.recv(self.header_size).decode(self.decoding_format)
-            if msg_length:
-                msg_length = int(msg_length)
-                print(msg_length)
-                msg_type = conn.recv(msg_length)
-                print(msg_type)
+        # while connected:
+        msg_length = conn.recv(self.header_size).decode(self.msg_format)
+        if msg_length:
+            msg_length = int(msg_length)
+            print(msg_length)
+            msg_type = conn.recv(msg_length)
+            print(msg_type)
 
-                if msg_type.decode(self.decoding_format) == 'peers_request':
-                    sendig_peers_thread = threading.Thread(target=self.__send_peers, args=(client_ip,))
-                    sendig_peers_thread.start()
+            if msg_type.decode(self.msg_format) == 'peers_request':
+                sendig_peers_thread = threading.Thread(target=self.__send_peers, args=(client_ip,))
+                sendig_peers_thread.start()
 
-                if msg_type.decode(self.decoding_format) == self.disconnect_message:
-                    connected = False
-                    print(f'[DISCONNECTED] {client_ip}')
+            if msg_type.decode(self.msg_format) == self.disconnect_message:
+                connected = False
+                print(f'[DISCONNECTED] {client_ip}')
 
         conn.close()
 
@@ -84,12 +84,12 @@ class Server():
         with open('file.txt', 'r') as f:
             peers = f.read()
             print(peers)
-            msg = peers.encode(self.decoding_format)
-            msg_len = str(len(msg)).encode(self.decoding_format)
+            msg = peers.encode(self.msg_format)
+            msg_len = str(len(msg)).encode(self.msg_format)
             msg_len += b' ' * (self.header_size - len(msg_len))
-            msg_type = 'peers_answer'.encode(self.decoding_format)
+            msg_type = 'peers_answer'.encode(self.msg_format)
             msg_type += b' ' * (self.msg_type_size - len(msg_type))
-
+            print(msg_type)
             sending_socket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
             sending_socket.connect((ip, self.clients_port))
             sending_socket.send(msg_len)
